@@ -2,12 +2,12 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "feature" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "feature" ]
+    branches: [ "master" ]
   schedule:
     - cron: '40 12 * * 0'
-    
+
 jobs:
   analyze:
     name: Analyze
@@ -41,6 +41,7 @@ jobs:
         category: "/language:${{matrix.language}}"
     
     - name: Check for Vulnerabilities
+      id: check-for-vulnerabilities
       run: |
         if [ -e codeql-results/codeql-results.sarif ]; then
           echo "Checking for vulnerabilities..."
@@ -49,26 +50,24 @@ jobs:
             echo "Vulnerabilities found. Merging is disabled."
             echo "::set-output name=status::failure"
           fi
-        fi
       working-directory: ${{ github.workspace }}
     
     - name: Prevent Merge
-    if: steps.check-for-vulnerabilities.outputs.status == 'failure'
-    run: |
-      echo "Preventing merging due to vulnerabilities..."
-      # Use the GitHub API to protect the branch
-      # Replace 'your-branch-name' with the name of your branch
-      branch_name="feature"
-      GITHUB_TOKEN=$GITHUB_TOKEN
-      protection_url="https://api.github.com/repos/${{ github.repository }}/branches/${branch_name}/protection"
-      protection_data=$(jq -n --argjson required_status_checks '{"strict": true, "contexts": []}' --argjson enforce_admins '{"enabled": true}' '{"required_status_checks": $required_status_checks, "enforce_admins": $enforce_admins, "restrictions": null}')
-      response=$(curl -X PUT -H "Authorization: token $GITHUB_TOKEN" -d "$protection_data" $protection_url)
-      if [ "$response" = "" ]; then
-      echo "Merge button disabled for branch $branch_name"
-      else
-      echo "Failed to disable merge button for branch $branch_name"
-      fi
+      if: steps.check-for-vulnerabilities.outputs.status == 'failure'
+      run: |
+        echo "Preventing merging due to vulnerabilities..."
+        # Use the GitHub API to protect the branch
+        # Replace 'your-branch-name' with the name of your branch
+        branch_name="master"
+        GITHUB_TOKEN=$GITHUB_TOKEN
+        protection_url="https://api.github.com/repos/${{ github.repository }}/branches/${master}/protection"
+        protection_data='{"required_status_checks": null, "enforce_admins": {"enabled": true}, "restrictions": null}'
+        response=$(curl -X PUT -H "Authorization: token $GITHUB_TOKEN" -d "$protection_data" $protection_url)
+        if [ "$response" = "" ]; then
+          echo "Merge button disabled for branch $branch_name"
+        else
+          echo "Failed to disable merge button for branch $branch_name"
+        fi
       env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       working-directory: ${{ github.workspace }}
-
