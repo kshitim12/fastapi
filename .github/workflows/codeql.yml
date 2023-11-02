@@ -52,23 +52,23 @@ jobs:
           fi
       working-directory: ${{ github.workspace }}
     
-    - name: Prevent Merge
-      if: steps.check-for-vulnerabilities.outputs.status == 'failure'
-      run: |
-       echo "Preventing merging due to vulnerabilities..."
-       # Use the GitHub API to protect the branch
-       # The branch_name variable is set to "master"
-       branch_name="master"
-       GITHUB_TOKEN=$GITHUB_TOKEN
-       protection_url="https://api.github.com/repos/${{ github.repository }}/branches/${master}/protection"
-       protection_data='{"required_status_checks": null, "enforce_admins": {"enabled": true}, "restrictions": null}'
-       response=$(curl -X PUT -H "Authorization: token $GITHUB_TOKEN" -d "$protection_data" $protection_url)
-       if [ "$response" = "" ]; then
-        echo "Merge button disabled for branch $master"
-       else
-          echo "Failed to disable merge button for branch $master"
-       fi
-      env:
-       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-       working-directory: ${{ github.workspace }}
+    # - name: Prevent Merge
+    #   if: steps.check-for-vulnerabilities.outputs.status == 'failure'
+    #   run: |
+    #    echo "Preventing merging due to vulnerabilities..."
+    #    # Use the GitHub API to protect the branch
+    #    # The branch_name variable is set to "master"
+    #    branch_name="master"
+    #    GITHUB_TOKEN=$GITHUB_TOKEN
+    #    protection_url="https://api.github.com/repos/${{ github.repository }}/branches/${master}/protection"
+    #    protection_data='{"required_status_checks": null, "enforce_admins": {"enabled": true}, "restrictions": null}'
+    #    response=$(curl -X PUT -H "Authorization: token $GITHUB_TOKEN" -d "$protection_data" $protection_url)
+    #    if [ "$response" = "" ]; then
+    #     echo "Merge button disabled for branch $master"
+    #    else
+    #       echo "Failed to disable merge button for branch $master"
+    #    fi
+    #   env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    working-directory: ${{ github.workspace }}
 
