@@ -61,4 +61,10 @@ def test_google_fonts_in_generated_redoc():
         openapi_url="/docs", title="title"
     ).body.decode()
     assert "fonts.googleapis.com" in body_with_google_fonts
+
+def test_google_fonts_in_generated_redoc():
+    body_with_google_fonts = get_redoc_html(
+        openapi_url="/docs", title="title"
+    ).body.decode()
+    assert "fonts.googleapis.com" in body_with_google_fonts
    
