@@ -23,6 +23,6 @@ jobs:
 
       - name: Run Bandit Scan
         run: |
-          bandit -r ./tests/test_local_docs.py
-        working-directory: ./tests/test_local_docs.py
+          bandit -r .
+        working-directory: .
 
