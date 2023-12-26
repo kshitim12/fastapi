@@ -1,3 +1,4 @@
+##This file will create the tag whenever any changes would be merged to master
 name: create_master_tag
 on:
    pull_request:
