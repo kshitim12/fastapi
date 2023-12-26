@@ -1,91 +1,46 @@
 name: create_master_tag
-
 on:
-
    pull_request:
-
      types:
-
        - closed
-
      branches:
-
        - 'master'
-
      paths-ignore:
-
        - .github/**
-
        - azure-pipelines.yml
-
 jobs:
-
   merge_from_hotfix_job:
-
     # this job will only run if the PR has been merged from hotfix-* branch
-
     if: github.event.pull_request.merged == true &&  startsWith(github.head_ref, 'hotfix-')  && contains(github.base_ref, 'master')
-
     runs-on: ubuntu-latest
-
     steps:
-
     - uses: actions/checkout@v2
-
     - run: |
-
         echo PR #${{ github.event.number }} has been merged
-
         git fetch --unshallow --tags --quiet
-
         current_version=$(git tag -l 'v[0-9]*' --sort -version:refname | head -n 1)
-
         first_part=${current_version%.*}
-
         last_part=${current_version##*.}
-
         last_part=$(($last_part + 1))
-
         tag=$first_part'.'$last_part
-
         git tag $tag
-
         git push origin refs/tags/$tag
-
   merge_from_release_job:
-
     # this job will only run if the PR has been merged from release-* branch
-
     if: github.event.pull_request.merged == true &&  startsWith(github.head_ref, 'release-') && contains(github.base_ref, 'master')
-
     runs-on: ubuntu-latest
-
     steps:
-
     - uses: actions/checkout@v2
-
     - run: |
-
         echo PR #${{ github.event.number }} has been merged
-
         intermediate=${{ github.head_ref }}
-
         new_prod_version=v${intermediate#*release-}
-
         git tag $new_prod_version
-
         git push origin refs/tags/$new_prod_version
-
   close_job:
-
     # this job will only run if the PR has been closed without being merged
-
     if: github.event.pull_request.merged == false  && contains(github.base_ref, 'master')
-
     runs-on: ubuntu-latest
-
     steps:
-
     - run: |
-
         echo PR #${{ github.event.number }} has been closed without being merged
